@@ -3,14 +3,14 @@
 #include <math.h>
 #include <omp.h>
 
-int threads = 8;
+int threads = 16;
 
 /* Standard C Function: Greatest Common Divisor */
 int gcd(int a, int b)
 {
 	int c;
-	omp_set_num_threads(threads);
-    #pragma omp private(a, b, c)
+	// omp_set_num_threads(threads);
+    #pragma omp shared(a, b, c)
 	while (a != 0){
 		c = a;
 		a = b % a;
@@ -33,14 +33,16 @@ void friendly_numbers(long int start, long int end)
 
 	long int i, j, factor, ii, sum, done, n;
 	omp_set_num_threads(threads);
-    #pragma omp parallel for shared(sum, num, den, the_num) private(i, j, ii, done, n)
+    #pragma omp parallel for shared(num, the_num, den, i) private(ii, done, n, sum, factor)
 	for (i = start; i <= end; i++){
 		ii = i - start;
 		sum = 1 + i;
 		the_num[ii] = i;
 		done = i;
 		factor = 2;
-        #pragma omp parallel reduction(+:c) shared(sum, factor, done)
+		// int nt = omp_get_num_threads();
+		// printf("threads - %d\n", nt);
+        #pragma omp parallel reduction(+:c) shared(sum, factor, done, i)
 		while (factor < done){
 			if ((i % factor) == 0){
 				sum += (factor + (i / factor));
@@ -73,12 +75,18 @@ void friendly_numbers(long int start, long int end)
 	free(den);
 }
 
-int main(int argc, char **argv)
-{
-	long int start;
-	long int end;
+int main(int argc, char **argv){
+	// long int start = 2;
+	// long int end = 10000;
+	// for(int i = 0; i < argc; i++){
+	// 	printf("argumento - %d, valor é - %s.\n", i, argv[i]);
+	// }
+	char *p;
+	long int start = strtol(argv[1], &p, 10);
+	long int end = strtol(argv[2], &p, 10);
+	threads = strtol(argv[3], &p, 10);
 
-	scanf("%ld %ld", &start, &end);
+	// scanf("%ld %ld", &start, &end);
 	// printf("Number %ld to %ld\n", start, end);
 	friendly_numbers(start, end);
 
