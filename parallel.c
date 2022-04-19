@@ -9,7 +9,7 @@ int threads = 16;
 int gcd(int a, int b)
 {
 	int c;
-    #pragma omp reduction(+:c) shared(a, b, c)
+    #pragma omp parallel shared(a, b, c)
 	while (a != 0){
 		c = a;
 		a = b % a;
@@ -39,7 +39,7 @@ void friendly_numbers(long int start, long int end)
 		the_num[ii] = i;
 		done = i;
 		factor = 2;
-        #pragma omp parallel reduction(+:c) shared(sum, factor, done, i)
+        #pragma omp parallel shared(sum, factor, done, i)
 		while (factor < done){
 			if ((i % factor) == 0){
 				sum += (factor + (i / factor));
